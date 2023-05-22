@@ -1,0 +1,57 @@
+import cv2
+import pytesseract
+import pandas as pd
+from tkinter import Tk
+from tkinter.filedialog import askopenfilename
+
+def extract_receipt_data(image_path):
+    # Load the image using OpenCV
+    image = cv2.imread(image_path)
+
+    # Preprocess the image (you may need to adjust the preprocessing steps based on your specific receipt images)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    gray = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+
+    # Perform OCR using pytesseract
+    receipt_text = pytesseract.image_to_string(gray)
+
+    # Extract the relevant information from the receipt text
+    receipt_lines = receipt_text.split('\n')
+    day = None
+    amount = None
+    restaurant_name = None
+    address = None
+
+    for line in receipt_lines:
+        if 'Date:' in line:
+            day = line.split('Date:')[1].strip()
+        elif 'Total:' in line:
+            amount = line.split('Total:')[1].strip()
+        elif 'Restaurant:' in line:
+            restaurant_name = line.split('Restaurant:')[1].strip()
+        elif 'Address:' in line:
+            address = line.split('Address:')[1].strip()
+
+    return {
+        'Day': day,
+        'Amount Spent': amount,
+        'Restaurant Name': restaurant_name,
+        'Address': address
+    }
+
+def create_spreadsheet(receipt_data, output_file):
+    # Create a DataFrame from the receipt data
+    df = pd.DataFrame([receipt_data])
+
+    # Write the DataFrame to a spreadsheet
+    df.to_csv(output_file, index=False)
+
+# Open a file dialog for the user to choose an image
+Tk().withdraw()
+image_path = askopenfilename(title="Select Receipt Image")
+
+if image_path:
+    output_file = 'receipt_data.csv'
+
+    receipt_data = extract_receipt_data(image_path)
+    create_spreadsheet(receipt_data, output_file)
