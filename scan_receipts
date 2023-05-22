@@ -1,3 +1,5 @@
+# Capture the Image: You can use the OpenCV library to capture an image from the device's camera. 
+
 import cv2
 
 camera = cv2.VideoCapture(0)
@@ -10,3 +12,73 @@ while True:
 
 camera.release()
 cv2.destroyAllWindows()
+
+# Pre-process the Image: You can use the pytesseract library to extract text from the image.
+
+import pytesseract
+import cv2
+
+img = cv2.imread('receipt.jpg')
+img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+text = pytesseract.image_to_string(img)
+print(text)
+
+# Extract Data from the Text: You can use regular expressions or other parsing methods to extract the data from the text.
+
+import re
+
+date_pattern = re.compile(r'(0?[1-9]|[12][0-9]|3[01])[/.-](0?[1-9]|1[012])[/.-]\d{4}')
+restaurant_pattern = re.compile(r'Restaurant: (.*)')
+location_pattern = re.compile(r'Location: (.*)')
+total_pattern = re.compile(r'Total: (\d+\.\d+)')
+
+date_match = date_pattern.search(text)
+restaurant_match = restaurant_pattern.search(text)
+location_match = location_pattern.search(text)
+total_match = total_pattern.search(text)
+
+date = date_match.group() if date_match else ''
+restaurant = restaurant_match.group(1) if restaurant_match else ''
+location = location_match.group(1) if location_match else ''
+total = total_match.group(1) if total_match else ''
+
+# Generate the Spreadsheet: You can use the pandas library to create a DataFrame and save it to a CSV file.
+
+import pandas as pd
+
+data = {
+    'Date': [date],
+    'Restaurant': [restaurant],
+    'Location': [location],
+    'Total': [total]
+}
+
+df = pd.DataFrame(data)
+df.to_csv('receipt.csv', index=False)
+
+# Combine the Steps: You can combine all of the steps into a single script or function that takes an image as input and returns a DataFrame.
+ 
+import cv2
+import pytesseract
+import re
+import pandas as pd
+
+def process_receipt(image_path):
+    img = cv2.imread(image_path)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+    text = pytesseract.image_to_string(img)
+
+    date_pattern = re.compile(r'(0?[1-9]|[12][0-9]|3[01])[/.-](0?[1-9]|1[012])[/.-]\d{4}')
+    restaurant_pattern = re.compile(r'Restaurant: (.*)')
+    location_pattern = re.compile(r'Location: (.*)')
+    total_pattern = re.compile(r'Total: (\d+\.\d+)')
+
+    date_match = date_pattern.search(text)
+    restaurant_match = restaurant_pattern.search(text)
+    location_match = location_pattern.search(text)
+    total_match = total_pattern.search(text)
+
+    date = date_match.group() if date_match else
+
